@@ -1,13 +1,13 @@
 # Flow Physics Database
 
-The **Georgia Tech Turbulence Database** is a frontend prototype for exploring large-scale flow physics datasets and composing research data requests. It is built with React, TypeScript, Tailwind CSS, and Vite. The current Isotropic Turbulence workflow identifies dataset variants, but no scientific files or processing service are connected.
+The **Georgia Tech Turbulence Database** is a frontend prototype for exploring large-scale flow physics datasets and composing research data requests. It is built with React, TypeScript, Tailwind CSS, and Vite. One Isotropic Turbulence variant has a direct public source-file link; no scientific processing service is connected.
 
 ## Current Features
 
 - Dataset browser and comparison dashboard using a local mock catalog.
-- Isotropic Turbulence selection by flow configuration and parameter, with refresh-safe variant URLs and HDF4 format metadata.
+- Isotropic Turbulence selection by flow configuration and parameter, with refresh-safe variant URLs and per-variant file-format metadata.
 - Guided Query Builder with dataset access choice, variable/query-type/spatial/time inputs, a visual region preview, a mock request-size estimator, and JSON review.
-- A disabled full-dataset download control until a real source file is connected. Filtered-query construction works in the UI, but scientific extraction and submission do not.
+- A direct complete-file download for Emulsions at Weber Number 0.5. Other variants remain unavailable. Filtered-query construction works in the UI, but scientific extraction and submission do not.
 - Documentation, citations placeholder, and an informational Machine Learning workspace. No training, inference, NVIDIA integration, or ML data preparation runs.
 
 The generic dataset catalog and estimator are prototypes, not verified metadata or measured performance for the eventual scientific files. Python snippets shown for generic mock queries are illustrative; Isotropic Turbulence Python export is disabled.
@@ -16,11 +16,11 @@ The generic dataset catalog and estimator are prototypes, not verified metadata 
 
 | Flow configuration | Parameter | Available values |
 | --- | --- | --- |
-| Bubbles | Density Ratio | 1000, 100, 10 |
-| Droplets | Density Ratio | 0.001, 0.01, 0.1 |
+| Bubbles | Density Ratio | 0.001, 0.01, 0.1 |
+| Droplets | Density Ratio | 10, 100, 1000 |
 | Emulsions | Weber Number | 0.5, 1, 1.25, 1.5, 1.75, 2 |
 
-Every listed variant identifies its source file format as **HDF4**. Repository IDs, filenames, revisions, file sizes, and actual variable metadata remain unconfigured.
+Only Emulsions at Weber Number **0.5** is mapped to a source file: the public HDF5 file `HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5` in the Hugging Face dataset repository `Onirban1234/MFlowDB` at revision `main`. Its file size and scientific variable metadata have not been verified. Other variants have no source mapping or confirmed format yet.
 
 ## Requirements
 
@@ -68,13 +68,13 @@ The tests cover the Isotropic configuration and provider state, request payload 
 
 ## Dataset Access Modes
 
-**Download Full Dataset** is intended to retrieve the complete, unmodified original HDF4 file for one exact variant. It will not require variable, spatial, or time settings. Its control is currently disabled because no source file is connected.
+**Download Full Dataset** links to the complete, unmodified original source file for one exact variant. It does not require variable, spatial, or time settings. The link is enabled only for Emulsions at Weber Number 0.5 and points directly to Hugging Face's `/resolve/main/` URL with `?download=true`. The browser handles the transfer; the app does not fetch or parse the HDF5 file. Other variants show a disabled control.
 
-**Continue with Query** opens UI controls for a selected variable, query type, spatial region, and time range. Its review produces a structured JSON request with `accessMode: "query"`. No HDF4 parsing, filtering, subset download, or query execution is implemented yet.
+**Continue with Query** opens UI controls for a selected variable, query type, spatial region, and time range. Its review produces a structured JSON request with `accessMode: "query"`. No file parsing, filtering, subset download, or query execution is implemented yet.
 
 ## Dataset Storage
 
-Large HDF4 scientific datasets are intentionally not stored in Git. The configuration and provider layer are prepared for an external source such as Hugging Face, but no repository, filename, token, or download endpoint has been configured. Do not commit datasets or secrets. If future access requires credentials, supply them through an appropriate secure service and GitHub secrets/environment configuration, never frontend source or committed `.env` files.
+Large scientific datasets are intentionally not stored in Git. The configuration and provider layer contain one public Hugging Face file mapping, with no token or proxy. Do not commit datasets or secrets. If future access requires credentials, supply them through an appropriate secure service and GitHub secrets/environment configuration, never frontend source or committed `.env` files.
 
 ## Project Structure
 
@@ -84,7 +84,7 @@ Large HDF4 scientific datasets are intentionally not stored in Git. The configur
 | `src/components/` | Reusable UI, including Query Builder and Dataset Access |
 | `src/config/isotropicTurbulenceConfig.ts` | Authoritative Isotropic variants and route context |
 | `src/config/queryRequest.ts` | Separate complete-download and filtered-query payloads |
-| `src/services/` | Dataset provider contract and unconnected Hugging Face placeholder |
+| `src/services/` | Dataset provider contract and direct-link Hugging Face resolver |
 | `src/data/datasets.ts` | Local mock catalog for the frontend prototype |
 | `src/types/` | Shared TypeScript UI/query types |
 | `tests/`, `scripts/test.mjs` | Automated tests and test runner |
@@ -92,6 +92,6 @@ Large HDF4 scientific datasets are intentionally not stored in Git. The configur
 
 ## Development Status
 
-Planned, but **not yet implemented**: connecting the real HDF4 files, Hugging Face access, complete-file downloads, server-side HDF4 subset extraction, ML-compatible data preparation, and NVIDIA model integration. The Machine Learning page is informational only.
+Planned, but **not yet implemented**: mapping the remaining source files, server-side subset extraction, ML-compatible data preparation, and NVIDIA model integration. The Machine Learning page is informational only.
 
 This project does not yet include a software license. Confirm licensing and repository visibility with the project owner before public release; a private GitHub repository is the safer starting point for research collaboration. See [CONTRIBUTING.md](CONTRIBUTING.md) for a short contribution checklist.

@@ -77,7 +77,7 @@ export function ReviewPanel({ query, dataset, estimator }: { query: QueryState; 
         <div><dt className="text-slate-500">Dataset</dt><dd className="font-semibold">Isotropic Turbulence</dd></div>
         <div><dt className="text-slate-500">Configuration</dt><dd className="font-semibold">{flowConfigurations[query.isotropicContext.configuration].label}</dd></div>
         <div><dt className="text-slate-500">{query.isotropicContext.parameter.type === "density-ratio" ? "Density Ratio" : "Weber Number"}</dt><dd className="font-semibold">{query.isotropicContext.parameter.value}</dd></div>
-        <div><dt className="text-slate-500">File Format</dt><dd className="font-semibold">{query.isotropicContext.fileFormat}</dd></div>
+        <div><dt className="text-slate-500">File Format</dt><dd className="font-semibold">{query.isotropicContext.fileFormat ?? "Not yet confirmed"}</dd></div>
         <div><dt className="text-slate-500">Access Mode</dt><dd className="font-semibold">Filtered Query</dd></div>
         <div><dt className="text-slate-500">Variable</dt><dd className="font-semibold">{query.variable}</dd></div>
         <div><dt className="text-slate-500">Query Type</dt><dd className="font-semibold">{queryTypeName}</dd></div>
@@ -106,7 +106,7 @@ export function ReviewPanel({ query, dataset, estimator }: { query: QueryState; 
               <Code2 className="h-3.5 w-3.5" aria-hidden="true" /> Export Python snippet
             </button>
           </div>
-          {pythonSnippet ? <pre className="max-h-80 overflow-auto rounded-md bg-gt-navy p-3 text-xs leading-5 text-cyan-50">{pythonSnippet}</pre> : <p className="rounded-md bg-slate-50 p-4 text-sm text-slate-600">Python export will be available after the HDF4 dataset structure and processing connection are configured.</p>}
+          {pythonSnippet ? <pre className="max-h-80 overflow-auto rounded-md bg-gt-navy p-3 text-xs leading-5 text-cyan-50">{pythonSnippet}</pre> : <p className="rounded-md bg-slate-50 p-4 text-sm text-slate-600">Python export will be available after the dataset structure and processing connection are configured.</p>}
         </div>
       </div>
 

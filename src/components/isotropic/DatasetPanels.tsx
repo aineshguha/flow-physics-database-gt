@@ -52,13 +52,15 @@ export function DatasetMetadata({ configuration, selection }: { configuration: D
 export function DatasetAccessPanel({ state }: { state: DatasetState }) {
   return <section className="border-t border-gt-gold/40 pt-6" aria-labelledby="access-heading">
     <h2 id="access-heading" className="text-xl font-semibold text-gt-navy">Access Dataset</h2>
-    <p className="mt-3 text-sm leading-6 text-slate-600">Dataset access will become available once this configuration is connected to the data repository.</p>
+    <p className="mt-3 text-sm leading-6 text-slate-600">{state.status === "DatasetAvailable" ? "Download the complete original file from Hugging Face. Filtered extraction is not available yet." : "Full dataset download will become available when this configuration is connected to a source file."}</p>
     <div className="mt-5 flex flex-wrap gap-3">
-      <button disabled className="inline-flex items-center gap-2 rounded-md bg-gt-navy px-4 py-3 text-sm font-semibold text-white opacity-50 disabled:cursor-not-allowed"><Download size={18} aria-hidden="true" />Download Dataset</button>
+      {state.status === "DatasetAvailable"
+        ? <a href={state.downloadUrl} className="inline-flex items-center gap-2 rounded-md bg-gt-navy px-4 py-3 text-sm font-semibold text-white"><Download size={18} aria-hidden="true" />Download Dataset</a>
+        : <button disabled className="inline-flex items-center gap-2 rounded-md bg-gt-navy px-4 py-3 text-sm font-semibold text-white opacity-50 disabled:cursor-not-allowed"><Download size={18} aria-hidden="true" />Download Dataset</button>}
       <button disabled className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-3 text-sm font-semibold opacity-50 disabled:cursor-not-allowed"><Code2 size={18} aria-hidden="true" />Use in Python</button>
     </div>
     <details className="mt-6 border-y border-slate-200 py-4"><summary className="cursor-pointer font-semibold text-gt-navy">Use in Python</summary>
-      {state.status === "DatasetAvailable" && state.pythonCode ? <pre className="mt-4 overflow-x-auto text-sm">{state.pythonCode}</pre> : <p className="mt-3 text-sm leading-6 text-slate-600">Python integration will be generated automatically after the dataset repository is connected.</p>}
+      {state.status === "DatasetAvailable" && state.pythonCode ? <pre className="mt-4 overflow-x-auto text-sm">{state.pythonCode}</pre> : <p className="mt-3 text-sm leading-6 text-slate-600">Python integration is not available yet.</p>}
     </details>
   </section>;
 }

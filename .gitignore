@@ -15,11 +15,13 @@ coverage/
 /local-data/
 *.hdf
 *.hdf4
+*.hdf5
 *.h4
 *.h5
 *.he5
 !tests/fixtures/*.hdf
 !tests/fixtures/*.hdf4
+!tests/fixtures/*.hdf5
 !tests/fixtures/*.h4
 !tests/fixtures/*.h5
 !tests/fixtures/*.he5

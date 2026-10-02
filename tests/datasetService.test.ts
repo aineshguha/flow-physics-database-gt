@@ -7,7 +7,7 @@ import { getDataset } from "../src/services/datasetService";
 import { huggingFaceDatasetProvider } from "../src/services/huggingFaceDatasetProvider";
 import "./queryBuilder.test";
 
-test("all twelve selections resolve independently as HDF4 without network requests", async () => {
+test("all twelve selections resolve independently without network requests", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = () => { throw new Error("Unexpected network request"); };
   try {
@@ -19,11 +19,23 @@ test("all twelve selections resolve independently as HDF4 without network reques
         const configuration = getDatasetConfiguration(selection);
         assert.ok(configuration);
         configurations.add(configuration);
-        assert.equal(configuration.connection.repositoryId, null);
-        assert.equal(configuration.connection.filename, null);
-        assert.equal(configuration.fileFormat, "HDF4");
         assert.equal(configuration.sampleCount, null);
-        assert.deepEqual(await getDataset(selection), { status: "DatasetNotConfigured" });
+        const result = await getDataset(selection);
+        if (category === "emulsions" && value === "0.5") {
+          assert.equal(configuration.fileFormat, "HDF5");
+          assert.equal(configuration.connection.repositoryId, "Onirban1234/MFlowDB");
+          assert.equal(configuration.connection.repositoryType, "dataset");
+          assert.equal(configuration.connection.revision, "main");
+          assert.equal(configuration.connection.filePath, "HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5");
+          assert.equal(configuration.connection.filename, "We_0_5.hdf5");
+          assert.equal(configuration.connection.access, "public");
+          assert.deepEqual(result, { status: "DatasetAvailable", downloadUrl: "https://huggingface.co/datasets/Onirban1234/MFlowDB/resolve/main/HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5?download=true" });
+        } else {
+          assert.equal(configuration.fileFormat, null);
+          assert.equal(configuration.connection.repositoryId, null);
+          assert.equal(configuration.connection.filename, null);
+          assert.deepEqual(result, { status: "DatasetNotConfigured" });
+        }
       }
     }
     assert.equal(configurations.size, 12);
@@ -33,16 +45,16 @@ test("all twelve selections resolve independently as HDF4 without network reques
 });
 
 test("invalid selections cannot fall back to a different dataset", async () => {
-  assert.equal(getDatasetConfiguration({ category: "bubbles", parameter: "weberNumber", value: 1000 }), null);
-  assert.equal(getDatasetConfiguration({ category: "droplets", parameter: "densityRatio", value: 1000 }), null);
+  assert.equal(getDatasetConfiguration({ category: "bubbles", parameter: "weberNumber", value: 0.001 }), null);
+  assert.equal(getDatasetConfiguration({ category: "droplets", parameter: "densityRatio", value: 0.001 }), null);
   assert.deepEqual(await getDataset({ category: "bubbles", parameter: "densityRatio", value: 19 }), { status: "DatasetUnavailable" });
   assert.ok(getDatasetConfiguration({ category: "emulsions", parameter: "weberNumber", value: 2 }));
-  assert.ok(getDatasetConfiguration({ category: "droplets", parameter: "densityRatio", value: 0.001 }));
+  assert.ok(getDatasetConfiguration({ category: "droplets", parameter: "densityRatio", value: 1000 }));
 });
 
 test("option lists and URL context preserve every supported parameter", () => {
-  assert.deepEqual(flowConfigurations.bubbles.values, ["1000", "100", "10"]);
-  assert.deepEqual(flowConfigurations.droplets.values, ["0.001", "0.01", "0.1"]);
+  assert.deepEqual(flowConfigurations.bubbles.values, ["0.001", "0.01", "0.1"]);
+  assert.deepEqual(flowConfigurations.droplets.values, ["10", "100", "1000"]);
   assert.deepEqual(flowConfigurations.emulsions.values, ["0.5", "1", "1.25", "1.5", "1.75", "2"]);
   for (const category of Object.keys(flowConfigurations) as FlowCategory[]) {
     const branch = flowConfigurations[category];
@@ -53,20 +65,22 @@ test("option lists and URL context preserve every supported parameter", () => {
       assert.deepEqual(selection, { category, parameter: branch.parameter, value });
       const context = getIsotropicQueryContext(selection);
       assert.ok(context);
-      assert.equal(context.fileFormat, "HDF4");
+      assert.equal(context.fileFormat, category === "emulsions" && value === "0.5" ? "HDF5" : null);
       assert.equal(context.configuration, category);
       assert.equal(context.parameter.value, Number(value));
     }
   }
   assert.equal(getIsotropicSelectionFromQueryPath("/query/isotropic/bubbles/19"), null);
   assert.equal(getIsotropicSelectionFromQueryPath("/query/isotropic/emulsions/999"), null);
-  assert.deepEqual(getIsotropicSelectionFromQueryPath("/query/isotropic/droplets/0.01/edit"), { category: "droplets", parameter: "densityRatio", value: "0.01" });
+  assert.deepEqual(getIsotropicSelectionFromQueryPath("/query/isotropic/droplets/10/edit"), { category: "droplets", parameter: "densityRatio", value: "10" });
+  assert.equal(getIsotropicSelectionFromQueryPath("/query/isotropic/bubbles/1000"), null);
+  assert.equal(getIsotropicSelectionFromQueryPath("/query/isotropic/droplets/0.01"), null);
   assert.equal(getIsotropicDraftFromQueryPath("/query/isotropic/emulsions/edit"), "emulsions");
   assert.equal(getIsotropicDraftFromQueryPath("/query/isotropic/bubbles/19/edit"), null);
 });
 
 test("complete-file payload cannot inherit query filters", () => {
-  const context = getIsotropicQueryContext({ category: "bubbles", parameter: "densityRatio", value: 100 });
+  const context = getIsotropicQueryContext({ category: "bubbles", parameter: "densityRatio", value: 0.01 });
   assert.ok(context);
   const query = {
     datasetId: "isotropic", isotropicContext: context, accessMode: "full-download",
@@ -87,7 +101,7 @@ test("provider errors become a controlled UI state", async () => {
   const resolve = huggingFaceDatasetProvider.resolve;
   huggingFaceDatasetProvider.resolve = async () => { throw new Error("Offline"); };
   try {
-    assert.deepEqual(await getDataset({ category: "bubbles", parameter: "densityRatio", value: 1000 }), { status: "ProviderUnreachable" });
+    assert.deepEqual(await getDataset({ category: "bubbles", parameter: "densityRatio", value: 0.001 }), { status: "ProviderUnreachable" });
   } finally {
     huggingFaceDatasetProvider.resolve = resolve;
   }

@@ -158,8 +158,8 @@ export function QueryBuilder({ selectedDatasetId, isotropicSelection, isotropicD
   const stepDescription = isotropicMode
     ? activeStep === 1 ? "Choose Bubbles, Droplets, or Emulsions. This determines which parameter values are available."
       : activeStep === 2 ? `Select the ${branch?.parameterLabel.toLowerCase() ?? "parameter"} that identifies the exact scientific dataset.`
-        : activeStep === 3 ? "Choose between the complete original HDF4 file and a filtered query. The download is not connected yet."
-          : activeStep === 8 ? "Review the request and copy its JSON. Dataset processing and Python export will be available once the HDF4 files are connected."
+        : activeStep === 3 ? "Choose between the complete original file and a filtered query. Download availability depends on the selected dataset."
+          : activeStep === 8 ? "Review the request and copy its JSON. Dataset processing and Python export are not connected yet."
             : stepDescriptions[activeStep > 3 ? activeStep - 3 : activeStep]
     : stepDescriptions[activeStep];
 
@@ -403,7 +403,7 @@ export function QueryBuilder({ selectedDatasetId, isotropicSelection, isotropicD
               ))}
             </select>
           </label>
-          {isotropicMode && <p className="mt-3 text-sm text-slate-600">These variable choices are a prototype. Available fields will be confirmed when the HDF4 files are connected.</p>}
+          {isotropicMode && <p className="mt-3 text-sm text-slate-600">These variable choices are a prototype. Available fields will be confirmed as dataset processing is connected.</p>}
         </div>
       );
     }
@@ -499,7 +499,7 @@ export function QueryBuilder({ selectedDatasetId, isotropicSelection, isotropicD
 
         {query.isotropicContext && activeStep >= 4 && <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-gt-gold/40 bg-white p-5">
           <div><p className="text-xs font-semibold uppercase text-slate-500">Selected Dataset</p><h3 className="mt-1 text-lg font-semibold text-gt-navy">Isotropic Turbulence</h3>
-            <p className="mt-1 text-sm text-slate-700">Configuration: {flowConfigurations[query.isotropicContext.configuration].label} · {query.isotropicContext.parameter.type === "density-ratio" ? "Density Ratio" : "Weber Number"}: {query.isotropicContext.parameter.value} · File Format: {query.isotropicContext.fileFormat}</p></div>
+            <p className="mt-1 text-sm text-slate-700">Configuration: {flowConfigurations[query.isotropicContext.configuration].label} · {query.isotropicContext.parameter.type === "density-ratio" ? "Density Ratio" : "Weber Number"}: {query.isotropicContext.parameter.value} · File Format: {query.isotropicContext.fileFormat ?? "Not yet confirmed"}</p></div>
           <a href={`#/datasets/isotropic/${query.isotropicContext.configuration}`} className="text-sm font-semibold text-gt-navy underline underline-offset-4">Change Dataset</a>
         </div>}
 

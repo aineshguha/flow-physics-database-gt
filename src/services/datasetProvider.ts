@@ -1,6 +1,8 @@
 export interface DatasetConnection {
   provider: string;
   repositoryId: string | null;
+  repositoryType: "dataset" | null;
+  filePath: string | null;
   filename: string | null;
   revision: string | null;
   access: "public" | "private" | "gated" | null;

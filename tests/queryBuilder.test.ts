@@ -15,12 +15,12 @@ test("direct Isotropic entry begins at Dataset before configuration", () => {
 test("dataset-browser entry opens at access choice with complete download disabled", () => {
   const html = renderToStaticMarkup(createElement(QueryBuilder, {
     selectedDatasetId: "isotropic",
-    isotropicSelection: { category: "droplets", parameter: "densityRatio", value: "0.01" }
+    isotropicSelection: { category: "droplets", parameter: "densityRatio", value: "10" }
   }));
   assert.match(html, /Dataset Access/);
   assert.match(html, /Droplets/);
-  assert.match(html, /0\.01/);
-  assert.match(html, /HDF4/);
+  assert.match(html, /Density Ratio/);
+  assert.match(html, /Not yet confirmed/);
   assert.match(html, /disabled=""[^>]*>.*Download Full Dataset/);
   assert.match(html, /Continue with Query/);
   assert.doesNotMatch(html, /Choose variable before continuing/);
@@ -33,7 +33,7 @@ test("Emulsions access choice uses the selected Weber number", () => {
   }));
   assert.match(html, /Weber Number/);
   assert.match(html, /1\.75/);
-  assert.match(html, /Full dataset download will become available/);
+  assert.match(html, /Checking dataset connection/);
 });
 
 test("non-Isotropic builder keeps the original dataset step", () => {

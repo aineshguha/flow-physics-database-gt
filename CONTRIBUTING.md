@@ -12,4 +12,4 @@ pnpm run build
 
 Describe the behavior changed and how you tested it. Keep scientific values tied to verified source material, and label prototype estimates or mock metadata clearly.
 
-Do not commit large HDF4 datasets, generated build output, credentials, access tokens, or `.env` files. Discuss new dataset storage or authentication needs with the project owner before implementing them. The project owner should decide licensing and public-release timing.
+Do not commit large scientific datasets (including HDF5 files), generated build output, credentials, access tokens, or `.env` files. Discuss new dataset storage or authentication needs with the project owner before implementing them. The project owner should decide licensing and public-release timing.

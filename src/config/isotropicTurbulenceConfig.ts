@@ -1,10 +1,8 @@
 import type { DatasetConfiguration } from "../services/datasetProvider";
 
-const ISOTROPIC_FILE_FORMAT = "HDF4" as const;
-
 export const flowConfigurations = {
-  bubbles: { label: "Bubbles", parameter: "densityRatio", parameterLabel: "Density Ratio", values: ["1000", "100", "10"], description: "Explore bubble configurations by density ratio." },
-  droplets: { label: "Droplets", parameter: "densityRatio", parameterLabel: "Density Ratio", values: ["0.001", "0.01", "0.1"], description: "Explore droplet configurations by density ratio." },
+  bubbles: { label: "Bubbles", parameter: "densityRatio", parameterLabel: "Density Ratio", values: ["0.001", "0.01", "0.1"], description: "Explore bubble configurations by density ratio." },
+  droplets: { label: "Droplets", parameter: "densityRatio", parameterLabel: "Density Ratio", values: ["10", "100", "1000"], description: "Explore droplet configurations by density ratio." },
   emulsions: { label: "Emulsions", parameter: "weberNumber", parameterLabel: "Weber Number", values: ["0.5", "1", "1.25", "1.5", "1.75", "2"], description: "Explore emulsion configurations by Weber number." }
 } as const;
 
@@ -20,14 +18,14 @@ export interface IsotropicQueryContext {
   configurationId: string;
   configuration: FlowCategory;
   parameter: { type: "density-ratio" | "weber-number"; value: number };
-  fileFormat: "HDF4";
+  fileFormat: string | null;
 }
 
 function disconnectedDataset(): DatasetConfiguration {
   return {
-    name: null, description: null, fileSize: null, fileFormat: ISOTROPIC_FILE_FORMAT,
+    name: null, description: null, fileSize: null, fileFormat: null,
     variables: [], sampleCount: null, version: null, lastUpdated: null, dataSource: null,
-    connection: { provider: "huggingFace", repositoryId: null, filename: null, revision: null, access: null }
+    connection: { provider: "huggingFace", repositoryId: null, repositoryType: null, filePath: null, filename: null, revision: null, access: null }
   };
 }
 
@@ -37,6 +35,21 @@ export const isotropicTurbulenceConfig: Record<FlowCategory, Record<string, Reco
     category,
     { [branch.parameter]: Object.fromEntries(branch.values.map(value => [value, disconnectedDataset()])) }
   ])) as Record<FlowCategory, Record<string, Record<string, DatasetConfiguration>>>;
+
+// This is the only verified source file; other variants remain intentionally unmapped.
+isotropicTurbulenceConfig.emulsions.weberNumber["0.5"] = {
+  ...disconnectedDataset(),
+  fileFormat: "HDF5",
+  connection: {
+    provider: "huggingFace",
+    repositoryId: "Onirban1234/MFlowDB",
+    repositoryType: "dataset",
+    filePath: "HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5",
+    filename: "We_0_5.hdf5",
+    revision: "main",
+    access: "public"
+  }
+};
 
 export function isFlowCategory(value: string): value is FlowCategory {
   return Object.prototype.hasOwnProperty.call(flowConfigurations, value);
@@ -50,13 +63,14 @@ export function getDatasetConfiguration(selection: DatasetSelection): DatasetCon
 }
 
 export function getIsotropicQueryContext(selection: DatasetSelection): IsotropicQueryContext | null {
-  if (!getDatasetConfiguration(selection)) return null;
+  const configuration = getDatasetConfiguration(selection);
+  if (!configuration) return null;
   return {
     family: "isotropic-turbulence",
     configurationId: `isotropic-${selection.category}-${selection.parameter === "densityRatio" ? "dr" : "we"}-${selection.value}`,
     configuration: selection.category,
     parameter: { type: selection.parameter === "densityRatio" ? "density-ratio" : "weber-number", value: Number(selection.value) },
-    fileFormat: ISOTROPIC_FILE_FORMAT
+    fileFormat: configuration.fileFormat
   };
 }
 
