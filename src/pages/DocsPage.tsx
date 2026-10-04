@@ -156,7 +156,7 @@ export function DocsPage() {
           <BookOpen className="h-5 w-5 text-cyan-200" aria-hidden="true" />
           <h2 className="mt-4 text-xl font-semibold">Prototype note</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-            No backend is connected. All fields, estimates, and snippets are mock data intended to show how a professor-facing frontend MVP could guide scientific decisions before an expensive data request.
+            Emulsions at Weber Number 0.5 has a verified local HDF5 slice service using array indices and a 4,096-value limit. Other dataset entries, Python/MATLAB snippets, and general method examples remain prototypes; no physical-coordinate interpolation is implemented.
           </p>
         </div>
       </div>

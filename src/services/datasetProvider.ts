@@ -19,6 +19,7 @@ export interface DatasetConfiguration {
   lastUpdated: string | null;
   dataSource: string | null;
   connection: DatasetConnection;
+  verifiedSchemaId: string | null;
 }
 
 export type DatasetResult =

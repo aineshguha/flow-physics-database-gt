@@ -41,7 +41,7 @@ export function DatasetAccessStep({ selection, accessMode, onSelectMode, onConti
           <span><span className="block font-semibold text-gt-navy">Download complete dataset</span><span className="mt-1 block text-sm leading-6 text-slate-600">Get the entire original source file without filters or conversion.</span></span></label>
         <dl className="mt-5 space-y-2 border-t border-slate-200 pt-4 text-sm">
           <div className="flex justify-between gap-3"><dt className="text-slate-500">File Format</dt><dd className="font-medium">{configuration.fileFormat ?? "Not yet confirmed"}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-slate-500">File Size</dt><dd className="font-medium">{configuration.fileSize === null ? "Not yet connected" : `${configuration.fileSize.toLocaleString()} bytes`}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-slate-500">Local file size</dt><dd className="font-medium">{configuration.fileSize === null ? "Not yet verified" : `${configuration.fileSize.toLocaleString()} bytes`}</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-slate-500">Source</dt><dd className="font-medium">{configuration.connection.repositoryId ?? "Not yet connected"}</dd></div>
         </dl>
         {state.status === "DatasetAvailable"
@@ -52,7 +52,7 @@ export function DatasetAccessStep({ selection, accessMode, onSelectMode, onConti
 
       <section className={`gt-card rounded-lg border p-5 ${accessMode === "query" ? "border-gt-gold" : "border-slate-200"}`}>
         <label className="flex cursor-pointer items-start gap-3"><input type="radio" name="access-mode" checked={accessMode === "query"} onChange={() => onSelectMode("query")} className="mt-1 accent-gt-navy" />
-          <span><span className="block font-semibold text-gt-navy">Continue with query</span><span className="mt-1 block text-sm leading-6 text-slate-600">Choose specific variables, spatial regions, and time ranges. Scientific extraction is not connected yet.</span></span></label>
+          <span><span className="block font-semibold text-gt-navy">Continue with query</span><span className="mt-1 block text-sm leading-6 text-slate-600">{configuration.verifiedSchemaId ? "Request a small real HDF5 slice using verified field names and array indices." : "No verified field schema is connected yet for this configuration."}</span></span></label>
         <button type="button" onClick={onContinue} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-gt-navy px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#001B33]">Continue with Query <ArrowRight size={17} aria-hidden="true" /></button>
       </section>
     </div>

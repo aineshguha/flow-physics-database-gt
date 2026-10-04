@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { flowConfigurations, getDatasetConfiguration, getIsotropicDraftFromQueryPath, getIsotropicQueryContext, getIsotropicSelectionFromQueryPath, type FlowCategory } from "../src/config/isotropicTurbulenceConfig";
+import { flowConfigurations, getDatasetConfiguration, getIsotropicDraftFromQueryPath, getIsotropicQueryContext, getIsotropicSelectionFromQueryPath, getVerifiedDatasetSchema, type FlowCategory } from "../src/config/isotropicTurbulenceConfig";
 import { buildRequestPayload } from "../src/config/queryRequest";
 import type { EstimatorResult, QueryState } from "../src/types/flow";
 import { getDataset } from "../src/services/datasetService";
 import { huggingFaceDatasetProvider } from "../src/services/huggingFaceDatasetProvider";
 import "./queryBuilder.test";
+import "./resultExport.test";
 
 test("all twelve selections resolve independently without network requests", async () => {
   const originalFetch = globalThis.fetch;
@@ -19,9 +20,11 @@ test("all twelve selections resolve independently without network requests", asy
         const configuration = getDatasetConfiguration(selection);
         assert.ok(configuration);
         configurations.add(configuration);
-        assert.equal(configuration.sampleCount, null);
         const result = await getDataset(selection);
         if (category === "emulsions" && value === "0.5") {
+          assert.equal(configuration.sampleCount, 1054);
+          assert.deepEqual(configuration.variables, ["p", "phi_1", "u_face", "v_face", "w_face"]);
+          assert.equal(configuration.verifiedSchemaId, "isotropic/emulsions/0.5");
           assert.equal(configuration.fileFormat, "HDF5");
           assert.equal(configuration.connection.repositoryId, "Onirban1234/MFlowDB");
           assert.equal(configuration.connection.repositoryType, "dataset");
@@ -31,6 +34,7 @@ test("all twelve selections resolve independently without network requests", asy
           assert.equal(configuration.connection.access, "public");
           assert.deepEqual(result, { status: "DatasetAvailable", downloadUrl: "https://huggingface.co/datasets/Onirban1234/MFlowDB/resolve/main/HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5?download=true" });
         } else {
+          assert.equal(configuration.sampleCount, null);
           assert.equal(configuration.fileFormat, null);
           assert.equal(configuration.connection.repositoryId, null);
           assert.equal(configuration.connection.filename, null);
@@ -50,6 +54,8 @@ test("invalid selections cannot fall back to a different dataset", async () => {
   assert.deepEqual(await getDataset({ category: "bubbles", parameter: "densityRatio", value: 19 }), { status: "DatasetUnavailable" });
   assert.ok(getDatasetConfiguration({ category: "emulsions", parameter: "weberNumber", value: 2 }));
   assert.ok(getDatasetConfiguration({ category: "droplets", parameter: "densityRatio", value: 1000 }));
+  assert.equal(getVerifiedDatasetSchema({ category: "emulsions", parameter: "weberNumber", value: 0.5 })?.fields.u_face.shape[1], 129);
+  assert.equal(getVerifiedDatasetSchema({ category: "emulsions", parameter: "weberNumber", value: 1 }), null);
 });
 
 test("option lists and URL context preserve every supported parameter", () => {

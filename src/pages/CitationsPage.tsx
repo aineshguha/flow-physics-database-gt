@@ -19,7 +19,7 @@ export function CitationsPage() {
             <FileText className="h-6 w-6 text-gt-navy" aria-hidden="true" />
             <h2 className="mt-4 text-2xl font-semibold tracking-tight text-ink">More information coming soon</h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              No citations are listed yet because the prototype is still using mock datasets. When the real flow datasets are added, this section should include the official citation format for each dataset and any associated method or database papers.
+              One Emulsions HDF5 file is now connected for local queries, but its required citation format and supporting papers have not been verified. Citation details will be added after they are confirmed with the dataset owner.
             </p>
           </div>
 
@@ -48,7 +48,7 @@ export function CitationsPage() {
             <Clock className="h-5 w-5 text-gt-navy" aria-hidden="true" />
             <h2 className="mt-4 text-lg font-semibold text-ink">Status</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Placeholder only. Citation details will be added after the real datasets replace the current mock catalog.
+              Citation details are pending verification. Do not infer a DOI or acknowledgement from the HDF5 file name.
             </p>
           </article>
         </div>

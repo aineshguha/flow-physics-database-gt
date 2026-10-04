@@ -1,4 +1,7 @@
 import type { DatasetConfiguration } from "../services/datasetProvider";
+import verifiedSchema from "../../metadata/we-0.5.schema.json";
+
+export { verifiedSchema };
 
 export const flowConfigurations = {
   bubbles: { label: "Bubbles", parameter: "densityRatio", parameterLabel: "Density Ratio", values: ["0.001", "0.01", "0.1"], description: "Explore bubble configurations by density ratio." },
@@ -24,7 +27,7 @@ export interface IsotropicQueryContext {
 function disconnectedDataset(): DatasetConfiguration {
   return {
     name: null, description: null, fileSize: null, fileFormat: null,
-    variables: [], sampleCount: null, version: null, lastUpdated: null, dataSource: null,
+    variables: [], sampleCount: null, version: null, lastUpdated: null, dataSource: null, verifiedSchemaId: null,
     connection: { provider: "huggingFace", repositoryId: null, repositoryType: null, filePath: null, filename: null, revision: null, access: null }
   };
 }
@@ -39,7 +42,12 @@ export const isotropicTurbulenceConfig: Record<FlowCategory, Record<string, Reco
 // This is the only verified source file; other variants remain intentionally unmapped.
 isotropicTurbulenceConfig.emulsions.weberNumber["0.5"] = {
   ...disconnectedDataset(),
+  name: verifiedSchema.sourceFilename,
+  fileSize: verifiedSchema.localFileSizeBytes,
   fileFormat: "HDF5",
+  variables: Object.keys(verifiedSchema.fields),
+  sampleCount: verifiedSchema.time.shape[0],
+  verifiedSchemaId: verifiedSchema.variantId,
   connection: {
     provider: "huggingFace",
     repositoryId: "Onirban1234/MFlowDB",
@@ -50,6 +58,10 @@ isotropicTurbulenceConfig.emulsions.weberNumber["0.5"] = {
     access: "public"
   }
 };
+
+export function getVerifiedDatasetSchema(selection: DatasetSelection) {
+  return getDatasetConfiguration(selection)?.verifiedSchemaId === verifiedSchema.variantId ? verifiedSchema : null;
+}
 
 export function isFlowCategory(value: string): value is FlowCategory {
   return Object.prototype.hasOwnProperty.call(flowConfigurations, value);

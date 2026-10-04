@@ -1,0 +1,46 @@
+{
+  "variantId": "isotropic/emulsions/0.5",
+  "configuration": "Emulsions",
+  "parameter": { "name": "Weber Number", "value": 0.5 },
+  "sourceFilename": "We_0_5.hdf5",
+  "localFileSizeBytes": 35002509662,
+  "fileFormat": "HDF5",
+  "fileAttributes": {
+    "dimensions": "time followed by native spatial dimensions",
+    "format": "ExaFlow3D fields assembled with FPCSLpy",
+    "merged_from": ["first_258.hdf5", "second_796.hdf5"],
+    "precision": "float32"
+  },
+  "groups": [],
+  "dimensionOrder": ["time", "x", "y", "z"],
+  "dimensionOrderEvidence": "Time-first is a file attribute; x/y/z ordering is inferred from grid_location attributes and the extra sample on each corresponding face grid.",
+  "coordinateArrays": [],
+  "physicalUnits": null,
+  "domainDimensions": null,
+  "spatialSpacing": null,
+  "time": {
+    "path": "/time",
+    "shape": [1054],
+    "dtype": "float64",
+    "first": 0.0,
+    "last": 359.508755317947,
+    "strictlyIncreasing": true,
+    "uniformInterval": false,
+    "units": null
+  },
+  "step": {
+    "path": "/step",
+    "shape": [1054],
+    "dtype": "int64",
+    "first": 16000,
+    "last": 279250,
+    "interval": 250
+  },
+  "fields": {
+    "p": { "path": "/p", "shape": [1054, 128, 128, 128], "dtype": "float32", "gridLocation": "cell", "chunks": [1, 64, 64, 64], "compression": "gzip", "compressionLevel": 4, "shuffle": true, "units": null },
+    "phi_1": { "path": "/phi_1", "shape": [1054, 128, 128, 128], "dtype": "float32", "gridLocation": "cell", "chunks": [1, 64, 64, 64], "compression": "gzip", "compressionLevel": 4, "shuffle": true, "units": null },
+    "u_face": { "path": "/u_face", "shape": [1054, 129, 128, 128], "dtype": "float32", "gridLocation": "x-face", "chunks": [1, 64, 64, 64], "compression": "gzip", "compressionLevel": 4, "shuffle": true, "units": null },
+    "v_face": { "path": "/v_face", "shape": [1054, 128, 129, 128], "dtype": "float32", "gridLocation": "y-face", "chunks": [1, 64, 64, 64], "compression": "gzip", "compressionLevel": 4, "shuffle": true, "units": null },
+    "w_face": { "path": "/w_face", "shape": [1054, 128, 128, 129], "dtype": "float32", "gridLocation": "z-face", "chunks": [1, 64, 64, 64], "compression": "gzip", "compressionLevel": 4, "shuffle": true, "units": null }
+  }
+}

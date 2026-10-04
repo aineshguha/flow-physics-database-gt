@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryBuilder } from "../src/components/QueryBuilder";
 import { DatasetAccessStep } from "../src/components/DatasetAccessStep";
+import { VerifiedQueryBuilder } from "../src/components/VerifiedQueryBuilder";
 
 test("direct Isotropic entry begins at Dataset before configuration", () => {
   const html = renderToStaticMarkup(createElement(QueryBuilder, { selectedDatasetId: "isotropic" }));
@@ -41,4 +42,13 @@ test("non-Isotropic builder keeps the original dataset step", () => {
   assert.match(html, /Channel Flow/);
   assert.doesNotMatch(html, /Flow configuration/);
   assert.doesNotMatch(html, /Dataset Access/);
+});
+
+test("verified query flow exposes only real HDF5 fields and index limits", () => {
+  const html = renderToStaticMarkup(createElement(VerifiedQueryBuilder, { onBack: () => {} }));
+  for (const field of ["p", "phi_1", "u_face", "v_face", "w_face"]) assert.match(html, new RegExp(`<option value="${field}"`));
+  for (const invented of ["velocity", "pressure", "vorticity", "gradient"]) assert.doesNotMatch(html, new RegExp(`<option value="${invented}"`));
+  assert.match(html, /1054 × 128 × 128 × 128/);
+  assert.match(html, /Physical coordinates and units are not present/);
+  assert.doesNotMatch(html, /Download CSV|Download JSON/);
 });

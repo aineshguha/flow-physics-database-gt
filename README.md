@@ -1,16 +1,17 @@
 # Flow Physics Database
 
-The **Georgia Tech Turbulence Database** is a frontend prototype for exploring large-scale flow physics datasets and composing research data requests. It is built with React, TypeScript, Tailwind CSS, and Vite. One Isotropic Turbulence variant has a direct public source-file link; no scientific processing service is connected.
+The **Georgia Tech Turbulence Database** is a React, TypeScript, Tailwind CSS, and Vite research-data prototype. The Emulsions / Weber Number 0.5 variant has a direct public full-file download and a local Python/HDF5 service for small, real index-based slices. Other variants remain unmapped.
 
 ## Current Features
 
 - Dataset browser and comparison dashboard using a local mock catalog.
 - Isotropic Turbulence selection by flow configuration and parameter, with refresh-safe variant URLs and per-variant file-format metadata.
-- Guided Query Builder with dataset access choice, variable/query-type/spatial/time inputs, a visual region preview, a mock request-size estimator, and JSON review.
-- A direct complete-file download for Emulsions at Weber Number 0.5. Other variants remain unavailable. Filtered-query construction works in the UI, but scientific extraction and submission do not.
+- Guided Query Builder with a verified index-based workflow for Emulsions / Weber Number 0.5. The other catalog entries remain prototypes, not scientific source metadata.
+- A direct complete-file download for Emulsions at Weber Number 0.5. Its small-slice queries return actual HDF5 values when the local query service is running. Other variants remain unavailable for real querying.
+- Successful small-slice queries can download only their returned values as CSV (array indices, step, and time per value) or JSON (the complete response and query context). These downloads do not re-read the source file.
 - Documentation, citations placeholder, and an informational Machine Learning workspace. No training, inference, NVIDIA integration, or ML data preparation runs.
 
-The generic dataset catalog and estimator are prototypes, not verified metadata or measured performance for the eventual scientific files. Python snippets shown for generic mock queries are illustrative; Isotropic Turbulence Python export is disabled.
+The other dataset entries and their estimates are prototypes, not verified metadata or measured performance. Python snippets shown for generic mock queries are illustrative; the verified Isotropic HDF5 query uses the local API instead.
 
 ## Isotropic Turbulence Structure
 
@@ -20,7 +21,7 @@ The generic dataset catalog and estimator are prototypes, not verified metadata 
 | Droplets | Density Ratio | 10, 100, 1000 |
 | Emulsions | Weber Number | 0.5, 1, 1.25, 1.5, 1.75, 2 |
 
-Only Emulsions at Weber Number **0.5** is mapped to a source file: the public HDF5 file `HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5` in the Hugging Face dataset repository `Onirban1234/MFlowDB` at revision `main`. Its file size and scientific variable metadata have not been verified. Other variants have no source mapping or confirmed format yet.
+Only Emulsions at Weber Number **0.5** is mapped to a source file: the public HDF5 file `HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5` in the Hugging Face dataset repository `Onirban1234/MFlowDB` at revision `main`. The downloaded local file was inspected: it is 35,002,509,662 bytes, with 1,054 stored frames and fields `p`, `phi_1`, `u_face`, `v_face`, and `w_face`. See [the inspected schema report](docs/we-0.5-schema.md). Other variants have no source mapping or confirmed format yet.
 
 ## Requirements
 
@@ -64,17 +65,31 @@ pnpm test
 pnpm run build
 ```
 
-The tests cover the Isotropic configuration and provider state, request payload separation, and initial Query Builder/access-screen rendering. Browser interaction checks are still important for the full step-by-step workflow.
+The frontend tests cover variant mapping, download resolution, request payload separation, initial Query Builder/access-screen rendering, and CSV/JSON result serialization. For the Python service, run `python -m unittest discover -s backend/tests`; setting `FLOWDB_HDF5_PATH` also runs real-file metadata and small-slice integration tests. Browser interaction checks are still important for the full step-by-step workflow.
 
 ## Dataset Access Modes
 
 **Download Full Dataset** links to the complete, unmodified original source file for one exact variant. It does not require variable, spatial, or time settings. The link is enabled only for Emulsions at Weber Number 0.5 and points directly to Hugging Face's `/resolve/main/` URL with `?download=true`. The browser handles the transfer; the app does not fetch or parse the HDF5 file. Other variants show a disabled control.
 
-**Continue with Query** opens UI controls for a selected variable, query type, spatial region, and time range. Its review produces a structured JSON request with `accessMode: "query"`. No file parsing, filtering, subset download, or query execution is implemented yet.
+**Continue with Query** opens a verified workflow for the We = 0.5 variant. Choose one of the five HDF5 field IDs, an operation (point, 2D slice, 3D volume, or time series), and integer half-open `[start, stop)` index ranges. The browser sends a JSON request to the local API; the Python service validates the variant, field, bounds, operation, and 4,096-value limit before reading only that HDF5 slice. The response includes actual numerical values, shape, dtype, and matching `/time` and `/step` values. No physical-coordinate mapping, resampling, or interpolation is claimed. The other configurations cannot proceed past variable selection until their files are inspected.
+
+**Download Results** appears only after a successful verified query and exports the response already in browser memory. CSV includes the frame, simulation step/time, and per-axis array indices for each value; JSON preserves the dataset, configuration, parameter, field path, request ranges, shape, dtype, and returned values. Changing query inputs or a failed rerun clears these actions. This is separate from **Download Full Dataset** and cannot bypass the same 4,096-value / 32-frame API limits.
+
+## Real-Data Query Service
+
+The 32.6 GiB source file stays outside Git and is **never loaded in full**. Install the small Python dependency in a virtual environment and point the service at your local copy:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r backend/requirements.txt
+FLOWDB_HDF5_PATH="/absolute/path/to/We_0_5.hdf5" .venv/bin/python -m backend.server
+```
+
+In another terminal, run `pnpm run dev`. Vite proxies `/api` to the loopback-only service at `127.0.0.1:8765`. The file path is read only from the service's environment, never from a browser request. The service uses Python's standard-library HTTP server plus `h5py` to avoid a larger backend framework for this first local-only slice API. Requests are limited to 4,096 values and 32 frames; larger or unsupported requests are rejected before reading field data. Set `FLOWDB_API_PORT` only if you also update the Vite proxy port. Do not expose this development service publicly; production deployment will need authentication, rate limits, and a dedicated data service.
 
 ## Dataset Storage
 
-Large scientific datasets are intentionally not stored in Git. The configuration and provider layer contain one public Hugging Face file mapping, with no token or proxy. Do not commit datasets or secrets. If future access requires credentials, supply them through an appropriate secure service and GitHub secrets/environment configuration, never frontend source or committed `.env` files.
+Large scientific datasets are intentionally not stored in Git. The configuration and provider layer contain one public Hugging Face full-file mapping, with no token. The local slice service reads the configurable `FLOWDB_HDF5_PATH`; no personal absolute path is committed. Do not commit datasets or secrets. If future access requires credentials, supply them through an appropriate secure service and GitHub secrets/environment configuration, never frontend source or committed `.env` files.
 
 ## Project Structure
 
@@ -83,7 +98,11 @@ Large scientific datasets are intentionally not stored in Git. The configuration
 | `src/App.tsx`, `src/pages/` | Hash routing and application pages |
 | `src/components/` | Reusable UI, including Query Builder and Dataset Access |
 | `src/config/isotropicTurbulenceConfig.ts` | Authoritative Isotropic variants and route context |
+| `metadata/we-0.5.schema.json` | Verified field shapes and metadata shared by frontend and query service |
+| `docs/we-0.5-schema.md` | Human-readable inspection report and prototype comparison |
+| `backend/` | Local HDF5 inspection, bounded slice service, and tests |
 | `src/config/queryRequest.ts` | Separate complete-download and filtered-query payloads |
+| `src/config/resultExport.ts` | Client-side CSV/JSON serialization of successful small query results |
 | `src/services/` | Dataset provider contract and direct-link Hugging Face resolver |
 | `src/data/datasets.ts` | Local mock catalog for the frontend prototype |
 | `src/types/` | Shared TypeScript UI/query types |
@@ -92,6 +111,6 @@ Large scientific datasets are intentionally not stored in Git. The configuration
 
 ## Development Status
 
-Planned, but **not yet implemented**: mapping the remaining source files, server-side subset extraction, ML-compatible data preparation, and NVIDIA model integration. The Machine Learning page is informational only.
+Planned, but **not yet implemented**: mapping the remaining source files, physical-coordinate queries, large-result exports, remote/production query hosting, ML-compatible data preparation, and NVIDIA model integration. The Machine Learning page is informational only.
 
 This project does not yet include a software license. Confirm licensing and repository visibility with the project owner before public release; a private GitHub repository is the safer starting point for research collaboration. See [CONTRIBUTING.md](CONTRIBUTING.md) for a short contribution checklist.

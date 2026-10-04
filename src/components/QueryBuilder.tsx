@@ -8,7 +8,8 @@ import { RequestEstimator } from "./RequestEstimator";
 import { ReviewPanel } from "./ReviewPanel";
 import { VisualRegionPreview } from "./VisualRegionPreview";
 import { DatasetAccessStep } from "./DatasetAccessStep";
-import { flowConfigurations, getIsotropicQueryContext, type DatasetSelection, type FlowCategory } from "../config/isotropicTurbulenceConfig";
+import { VerifiedQueryBuilder } from "./VerifiedQueryBuilder";
+import { flowConfigurations, getIsotropicQueryContext, getVerifiedDatasetSchema, type DatasetSelection, type FlowCategory } from "../config/isotropicTurbulenceConfig";
 
 const queryTypeLabels: Record<QueryType, string> = {
   point: "Point query",
@@ -151,6 +152,7 @@ export function QueryBuilder({ selectedDatasetId, isotropicSelection, isotropicD
   const selectedVariant = selectedCategory && branch && (branch.values as readonly string[]).includes(selectedValue)
     ? { category: selectedCategory, parameter: branch.parameter, value: selectedValue } satisfies DatasetSelection
     : null;
+  const verifiedSchema = selectedVariant ? getVerifiedDatasetSchema(selectedVariant) : null;
   const steps = isotropicMode
     ? isotropicSteps.map((label, index) => index === 2 && branch ? branch.parameterLabel : label)
     : undefined;
@@ -187,6 +189,7 @@ export function QueryBuilder({ selectedDatasetId, isotropicSelection, isotropicD
     if (isotropicMode && step === 2) return selectedVariant ? "" : `Choose a ${branch?.parameterLabel.toLowerCase() ?? "parameter"} before continuing.`;
     if (isotropicMode && step === 3) return query.isotropicContext ? "" : "Choose an exact dataset variant before continuing.";
     const standard = isotropicMode && step > 3 ? step - 3 : step;
+    if (standard === 1 && isotropicMode && !verifiedSchema) return "No verified variable schema is connected for this configuration yet.";
     if (standard === 1 && !query.variable) return "Choose a variable before continuing.";
     if (standard === 2 && !query.queryType) return "Choose a query type before continuing.";
 
@@ -397,13 +400,13 @@ export function QueryBuilder({ selectedDatasetId, isotropicSelection, isotropicD
           <label className="grid gap-1.5">
             <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Variable</span>
             <select value={query.variable} onChange={(event) => updateQuery({ variable: event.target.value })} className="h-10 rounded-md border border-slate-300 px-3 text-sm">
-              {isotropicMode && <option value="">Choose a prototype variable</option>}
-              {dataset.variables.map((variable) => (
+              {isotropicMode && <option value="">No verified field available</option>}
+              {(isotropicMode ? [] : dataset.variables).map((variable) => (
                 <option key={variable} value={variable}>{variable}</option>
               ))}
             </select>
           </label>
-          {isotropicMode && <p className="mt-3 text-sm text-slate-600">These variable choices are a prototype. Available fields will be confirmed as dataset processing is connected.</p>}
+          {isotropicMode && <p className="mt-3 text-sm text-slate-600">Real querying is available only for Emulsions at Weber Number 0.5. Other configurations need their files inspected first.</p>}
         </div>
       );
     }
@@ -480,6 +483,10 @@ export function QueryBuilder({ selectedDatasetId, isotropicSelection, isotropicD
     }
 
     return <ReviewPanel query={query} dataset={dataset} estimator={estimator} />;
+  }
+
+  if (isotropicMode && activeStep >= 4 && verifiedSchema) {
+    return <VerifiedQueryBuilder onBack={() => setActiveStep(3)} />;
   }
 
   return (
