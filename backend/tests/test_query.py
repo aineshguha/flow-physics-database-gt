@@ -3,6 +3,7 @@ import unittest
 
 from backend.inspect import discover_metadata
 from backend.query import MAX_FRAMES, MAX_VALUES, QueryError, SCHEMA, query_data, validate_query
+from backend.source import LocalHDF5Source
 
 
 def request(variable="p", operation="point", ranges=None, variant=None):
@@ -29,6 +30,11 @@ class QueryTests(unittest.TestCase):
     def test_unknown_variable(self):
         with self.assertRaisesRegex(QueryError, "Unknown variable"):
             validate_query(request(variable="../../private"))
+
+    def test_arbitrary_remote_url_or_hdf5_path_is_rejected(self):
+        for extra in ({"url": "https://example.com/other.hdf5"}, {"datasetPath": "/private"}, {"repo": "other/repo"}):
+            with self.subTest(extra=extra), self.assertRaisesRegex(QueryError, "only variant"):
+                validate_query({**request(), **extra})
 
     def test_bounds_and_integer_validation(self):
         for ranges in (
@@ -72,7 +78,7 @@ class QueryTests(unittest.TestCase):
     @unittest.skipUnless(os.environ.get("FLOWDB_HDF5_PATH"), "Set FLOWDB_HDF5_PATH for real-file integration tests")
     def test_real_small_slice(self):
         ranges = {"time": [0, 1], "x": [0, 2], "y": [0, 2], "z": [0, 2]}
-        result = query_data(request(operation="volume", ranges=ranges), os.environ["FLOWDB_HDF5_PATH"])
+        result = query_data(request(operation="volume", ranges=ranges), LocalHDF5Source(os.environ["FLOWDB_HDF5_PATH"]))
         self.assertEqual(result["shape"], [1, 2, 2, 2])
         self.assertEqual(result["dataset"], "Isotropic Turbulence")
         self.assertEqual(result["dtype"], "float32")
@@ -82,10 +88,11 @@ class QueryTests(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get("FLOWDB_HDF5_PATH"), "Set FLOWDB_HDF5_PATH for real-file integration tests")
     def test_real_face_field_and_time_series(self):
-        point = query_data(request(variable="u_face", ranges={"time": [0, 1], "x": [128, 129], "y": [0, 1], "z": [0, 1]}), os.environ["FLOWDB_HDF5_PATH"])
+        source = LocalHDF5Source(os.environ["FLOWDB_HDF5_PATH"])
+        point = query_data(request(variable="u_face", ranges={"time": [0, 1], "x": [128, 129], "y": [0, 1], "z": [0, 1]}), source)
         self.assertEqual(point["gridLocation"], "x-face")
         self.assertEqual(point["shape"], [1, 1, 1, 1])
-        series = query_data(request(operation="time-series", ranges={"time": [0, 2], "x": [0, 1], "y": [0, 1], "z": [0, 1]}), os.environ["FLOWDB_HDF5_PATH"])
+        series = query_data(request(operation="time-series", ranges={"time": [0, 2], "x": [0, 1], "y": [0, 1], "z": [0, 1]}), source)
         self.assertEqual(series["shape"], [2, 1, 1, 1])
         self.assertEqual(series["step"], [16000, 16250])
         self.assertAlmostEqual(series["time"][1], 0.385)

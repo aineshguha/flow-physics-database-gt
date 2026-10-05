@@ -73,8 +73,8 @@ export function VerifiedQueryBuilder({ onBack }: { onBack: () => void }) {
       if (!response.ok) throw new Error();
       return response.json() as Promise<{ status: string }>;
     }).then((health) => {
-      if (active) setServiceStatus(health.status === "ready" ? "Local query service ready" : "Local HDF5 path is not configured");
-    }).catch(() => { if (active) setServiceStatus("Local query service is offline"); });
+      if (active) setServiceStatus(health.status === "ready" ? "Query service ready" : "Query source is not configured");
+    }).catch(() => { if (active) setServiceStatus("Query service is offline"); });
     return () => { active = false; };
   }, []);
 
@@ -114,7 +114,7 @@ export function VerifiedQueryBuilder({ onBack }: { onBack: () => void }) {
       if (!response.ok) throw new Error(body.error ?? "Query failed.");
       if (requestRevision.current === revision) setResult(body);
     } catch (cause) {
-      if (requestRevision.current === revision) setError(cause instanceof Error ? cause.message : "Unable to reach the local query service.");
+      if (requestRevision.current === revision) setError(cause instanceof Error ? cause.message : "Unable to reach the query service.");
     } finally {
       if (requestRevision.current === revision) setLoading(false);
     }

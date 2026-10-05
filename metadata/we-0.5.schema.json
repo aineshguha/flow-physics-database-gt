@@ -5,6 +5,14 @@
   "sourceFilename": "We_0_5.hdf5",
   "localFileSizeBytes": 35002509662,
   "fileFormat": "HDF5",
+  "remoteSource": {
+    "provider": "huggingFace",
+    "repositoryId": "Onirban1234/MFlowDB",
+    "repositoryType": "dataset",
+    "revision": "55532332ae64497403da215139e2ca076b3c31f2",
+    "filePath": "HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5",
+    "etag": "e50a2d6e4808ce678dfdaf7f557d5b1f926a4908703e7b094de5bc2ea6d1119c"
+  },
   "fileAttributes": {
     "dimensions": "time followed by native spatial dimensions",
     "format": "ExaFlow3D fields assembled with FPCSLpy",

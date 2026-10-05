@@ -28,11 +28,11 @@ test("all twelve selections resolve independently without network requests", asy
           assert.equal(configuration.fileFormat, "HDF5");
           assert.equal(configuration.connection.repositoryId, "Onirban1234/MFlowDB");
           assert.equal(configuration.connection.repositoryType, "dataset");
-          assert.equal(configuration.connection.revision, "main");
+          assert.equal(configuration.connection.revision, "55532332ae64497403da215139e2ca076b3c31f2");
           assert.equal(configuration.connection.filePath, "HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5");
           assert.equal(configuration.connection.filename, "We_0_5.hdf5");
           assert.equal(configuration.connection.access, "public");
-          assert.deepEqual(result, { status: "DatasetAvailable", downloadUrl: "https://huggingface.co/datasets/Onirban1234/MFlowDB/resolve/main/HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5?download=true" });
+          assert.deepEqual(result, { status: "DatasetAvailable", downloadUrl: "https://huggingface.co/datasets/Onirban1234/MFlowDB/resolve/55532332ae64497403da215139e2ca076b3c31f2/HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5?download=true" });
         } else {
           assert.equal(configuration.sampleCount, null);
           assert.equal(configuration.fileFormat, null);

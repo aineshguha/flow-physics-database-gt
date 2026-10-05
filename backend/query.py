@@ -20,8 +20,10 @@ class QueryError(ValueError):
 def validate_query(payload, schema=SCHEMA):
     if not isinstance(payload, dict):
         raise QueryError("Request must be a JSON object.")
+    if set(payload) != {"variant", "variable", "operation", "ranges"}:
+        raise QueryError("Request must contain only variant, variable, operation, and ranges.")
     if payload.get("variant") != schema["variantId"]:
-        raise QueryError("This dataset variant is not available for local queries.")
+        raise QueryError("This dataset variant is not available for verified queries.")
     variable = payload.get("variable")
     if not isinstance(variable, str) or variable not in schema["fields"]:
         raise QueryError("Unknown variable. Select one of the verified fields.")
@@ -67,13 +69,11 @@ def _json_values(values):
     return values
 
 
-def query_data(payload, file_path, schema=SCHEMA):
+def query_data(payload, source, schema=SCHEMA):
     variable, operation, ranges, count = validate_query(payload, schema)
-    if not file_path or not Path(file_path).is_file():
-        raise FileNotFoundError("Local HDF5 file is not configured or cannot be found.")
     field = schema["fields"][variable]
     slices = tuple(slice(*ranges[axis]) for axis in AXES)
-    with h5py.File(file_path, "r") as file:
+    with source.open() as file:
         # Metadata is checked before reading so a different file cannot silently satisfy this mapping.
         for path, expected_shape in (
             (field["path"], field["shape"]),

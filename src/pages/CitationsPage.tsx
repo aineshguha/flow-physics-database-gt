@@ -19,7 +19,7 @@ export function CitationsPage() {
             <FileText className="h-6 w-6 text-gt-navy" aria-hidden="true" />
             <h2 className="mt-4 text-2xl font-semibold tracking-tight text-ink">More information coming soon</h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              One Emulsions HDF5 file is now connected for local queries, but its required citation format and supporting papers have not been verified. Citation details will be added after they are confirmed with the dataset owner.
+              One Emulsions HDF5 file is now connected for remote queries, but its required citation format and supporting papers have not been verified. Citation details will be added after they are confirmed with the dataset owner.
             </p>
           </div>
 

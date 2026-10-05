@@ -38,7 +38,7 @@ export function DatasetMetadata({ configuration, selection }: { configuration: D
     ["Dataset name", configuration.name], ["Configuration", branch.label],
     ["Parameter", branch.parameterLabel], ["Parameter value", String(selection.value)],
     ["Dataset description", configuration.description],
-    ["Observed local file size", configuration.fileSize === null ? null : `${configuration.fileSize.toLocaleString()} bytes`],
+    ["Verified source file size", configuration.fileSize === null ? null : `${configuration.fileSize.toLocaleString()} bytes`],
     ["File format", configuration.fileFormat], ["Available variables", configuration.variables.join(", ") || null],
     [schema ? "Stored frames" : "Number of samples/data points", configuration.sampleCount?.toLocaleString()],
     ["Dataset version", configuration.version], ["Last updated", configuration.lastUpdated], ["Data source", configuration.dataSource]
@@ -57,7 +57,7 @@ export function DatasetMetadata({ configuration, selection }: { configuration: D
 export function DatasetAccessPanel({ state, hasVerifiedSchema }: { state: DatasetState; hasVerifiedSchema: boolean }) {
   return <section className="border-t border-gt-gold/40 pt-6" aria-labelledby="access-heading">
     <h2 id="access-heading" className="text-xl font-semibold text-gt-navy">Access Dataset</h2>
-    <p className="mt-3 text-sm leading-6 text-slate-600">{state.status === "DatasetAvailable" ? hasVerifiedSchema ? "Download the original file from Hugging Face, or build a small local HDF5 slice query below." : "Download the complete original file from Hugging Face." : "Full dataset download will become available when this configuration is connected to a source file."}</p>
+    <p className="mt-3 text-sm leading-6 text-slate-600">{state.status === "DatasetAvailable" ? hasVerifiedSchema ? "Optionally download the full file from Hugging Face, or query a small remote HDF5 slice below." : "Download the complete original file from Hugging Face." : "Full dataset download will become available when this configuration is connected to a source file."}</p>
     <div className="mt-5 flex flex-wrap gap-3">
       {state.status === "DatasetAvailable"
         ? <a href={state.downloadUrl} className="inline-flex items-center gap-2 rounded-md bg-gt-navy px-4 py-3 text-sm font-semibold text-white"><Download size={18} aria-hidden="true" />Download Dataset</a>

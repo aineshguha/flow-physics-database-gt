@@ -41,7 +41,7 @@ export function DatasetAccessStep({ selection, accessMode, onSelectMode, onConti
           <span><span className="block font-semibold text-gt-navy">Download complete dataset</span><span className="mt-1 block text-sm leading-6 text-slate-600">Get the entire original source file without filters or conversion.</span></span></label>
         <dl className="mt-5 space-y-2 border-t border-slate-200 pt-4 text-sm">
           <div className="flex justify-between gap-3"><dt className="text-slate-500">File Format</dt><dd className="font-medium">{configuration.fileFormat ?? "Not yet confirmed"}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-slate-500">Local file size</dt><dd className="font-medium">{configuration.fileSize === null ? "Not yet verified" : `${configuration.fileSize.toLocaleString()} bytes`}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-slate-500">Source file size</dt><dd className="font-medium">{configuration.fileSize === null ? "Not yet verified" : `${configuration.fileSize.toLocaleString()} bytes`}</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-slate-500">Source</dt><dd className="font-medium">{configuration.connection.repositoryId ?? "Not yet connected"}</dd></div>
         </dl>
         {state.status === "DatasetAvailable"

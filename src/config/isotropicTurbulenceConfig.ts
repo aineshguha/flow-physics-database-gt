@@ -44,17 +44,17 @@ isotropicTurbulenceConfig.emulsions.weberNumber["0.5"] = {
   ...disconnectedDataset(),
   name: verifiedSchema.sourceFilename,
   fileSize: verifiedSchema.localFileSizeBytes,
-  fileFormat: "HDF5",
+  fileFormat: verifiedSchema.fileFormat,
   variables: Object.keys(verifiedSchema.fields),
   sampleCount: verifiedSchema.time.shape[0],
   verifiedSchemaId: verifiedSchema.variantId,
   connection: {
     provider: "huggingFace",
-    repositoryId: "Onirban1234/MFlowDB",
-    repositoryType: "dataset",
-    filePath: "HIT/Low_We/emulsions/We_0_5/We_0_5.hdf5",
-    filename: "We_0_5.hdf5",
-    revision: "main",
+    repositoryId: verifiedSchema.remoteSource.repositoryId,
+    repositoryType: verifiedSchema.remoteSource.repositoryType as "dataset",
+    filePath: verifiedSchema.remoteSource.filePath,
+    filename: verifiedSchema.sourceFilename,
+    revision: verifiedSchema.remoteSource.revision,
     access: "public"
   }
 };

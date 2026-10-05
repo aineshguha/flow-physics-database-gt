@@ -15,7 +15,7 @@ export const datasets: Dataset[] = [
     tags: ["HDF5", "Time Resolved", "Staggered Grid"],
     bestUseCase: "Inspecting verified raw fields for the We = 0.5 Emulsions variant.",
     difficulty: "Medium",
-    summary: "One verified Emulsions file is queryable locally; other configurations remain unmapped."
+    summary: "One verified Emulsions file is queryable through the remote source; other configurations remain unmapped."
   },
   {
     id: "channel",
