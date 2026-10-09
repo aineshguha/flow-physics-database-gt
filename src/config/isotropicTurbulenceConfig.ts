@@ -10,6 +10,34 @@ export const flowConfigurations = {
 } as const;
 
 export type FlowCategory = keyof typeof flowConfigurations;
+export interface DatasetPreviewAsset {
+  image: string;
+  alt: string;
+  type: "placeholder" | "visualization";
+}
+
+// Visual assets are independent of source-file availability and scientific metadata.
+export const datasetPreviews: { [K in FlowCategory]: Record<(typeof flowConfigurations)[K]["values"][number], DatasetPreviewAsset> } = {
+  bubbles: {
+    "0.001": { image: "/dataset-previews/bubbles-dr-0.001.svg", alt: "Illustrative bubble structures in fluid for density ratio 0.001", type: "placeholder" },
+    "0.01": { image: "/dataset-previews/bubbles-dr-0.01.svg", alt: "Illustrative bubble structures in fluid for density ratio 0.01", type: "placeholder" },
+    "0.1": { image: "/dataset-previews/bubbles-dr-0.1.svg", alt: "Illustrative bubble structures in fluid for density ratio 0.1", type: "placeholder" }
+  },
+  droplets: {
+    "10": { image: "/dataset-previews/droplets-dr-10.svg", alt: "Illustrative dispersed droplets for density ratio 10", type: "placeholder" },
+    "100": { image: "/dataset-previews/droplets-dr-100.svg", alt: "Illustrative dispersed droplets for density ratio 100", type: "placeholder" },
+    "1000": { image: "/dataset-previews/droplets-dr-1000.svg", alt: "Illustrative dispersed droplets for density ratio 1000", type: "placeholder" }
+  },
+  emulsions: {
+    "0.5": { image: "/dataset-previews/emulsions-we-0.5.svg", alt: "Illustrative two-phase fluid forms for Weber number 0.5", type: "placeholder" },
+    "1": { image: "/dataset-previews/emulsions-we-1.svg", alt: "Illustrative two-phase fluid forms for Weber number 1", type: "placeholder" },
+    "1.25": { image: "/dataset-previews/emulsions-we-1.25.svg", alt: "Illustrative two-phase fluid forms for Weber number 1.25", type: "placeholder" },
+    "1.5": { image: "/dataset-previews/emulsions-we-1.5.svg", alt: "Illustrative two-phase fluid forms for Weber number 1.5", type: "placeholder" },
+    "1.75": { image: "/dataset-previews/emulsions-we-1.75.svg", alt: "Illustrative two-phase fluid forms for Weber number 1.75", type: "placeholder" },
+    "2": { image: "/dataset-previews/emulsions-we-2.svg", alt: "Illustrative two-phase fluid forms for Weber number 2", type: "placeholder" }
+  }
+};
+
 export interface DatasetSelection {
   category: FlowCategory;
   parameter: "densityRatio" | "weberNumber";
@@ -61,6 +89,11 @@ isotropicTurbulenceConfig.emulsions.weberNumber["0.5"] = {
 
 export function getVerifiedDatasetSchema(selection: DatasetSelection) {
   return getDatasetConfiguration(selection)?.verifiedSchemaId === verifiedSchema.variantId ? verifiedSchema : null;
+}
+
+export function getDatasetPreview(selection: DatasetSelection): DatasetPreviewAsset | null {
+  if (!getDatasetConfiguration(selection)) return null;
+  return (datasetPreviews[selection.category] as Record<string, DatasetPreviewAsset>)[String(selection.value)] ?? null;
 }
 
 export function isFlowCategory(value: string): value is FlowCategory {

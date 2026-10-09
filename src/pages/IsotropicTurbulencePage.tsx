@@ -4,6 +4,7 @@ import { flowConfigurations, getDatasetConfiguration, isFlowCategory, type Datas
 import { getDataset } from "../services/datasetService";
 import type { DatasetState } from "../services/datasetProvider";
 import { DatasetAccessPanel, DatasetBreadcrumbs, DatasetMetadata, DatasetStatus } from "../components/isotropic/DatasetPanels";
+import { DatasetPreview } from "../components/isotropic/DatasetPreview";
 
 const base = "#/datasets/isotropic";
 const icons = { bubbles: Circle, droplets: Droplets, emulsions: Layers3 };
@@ -18,7 +19,7 @@ function DatasetDetails({ selection }: { selection: DatasetSelection }) {
     void getDataset(selection).then(result => { if (active) setState(result); });
     return () => { active = false; };
   }, [selection.category, selection.parameter, selection.value]);
-  return <><DatasetStatus state={state} /><div className="mt-8 grid gap-10 lg:grid-cols-2">
+  return <><DatasetStatus state={state} /><DatasetPreview selection={selection} /><div className="mt-8 grid gap-10 lg:grid-cols-2">
     <DatasetMetadata configuration={configuration} selection={selection} /><DatasetAccessPanel state={state} hasVerifiedSchema={Boolean(configuration.verifiedSchemaId)} />
   </div><a href={`#/query/isotropic/${selection.category}/${selection.value}`} className="mt-8 inline-flex items-center gap-2 rounded-md bg-gt-navy px-5 py-3 font-semibold text-white transition hover:bg-[#001B33]">Build Query <ArrowRight size={18} aria-hidden="true" /></a></>;
 }

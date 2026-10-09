@@ -6,6 +6,7 @@ The **Georgia Tech Turbulence Database** is a React, TypeScript, Tailwind CSS, a
 
 - Dataset browser and comparison dashboard using a local mock catalog.
 - Isotropic Turbulence selection by flow configuration and parameter, with refresh-safe variant URLs and per-variant file-format metadata.
+- A Dataset Preview for every Isotropic variant, using local illustrative artwork clearly distinguished from actual simulation results.
 - Guided Query Builder with a verified index-based workflow for Emulsions / Weber Number 0.5. The other catalog entries remain prototypes, not scientific source metadata.
 - A direct complete-file download for Emulsions at Weber Number 0.5. Its small-slice queries return actual remote HDF5 values when the query API is running; the full file is not required on a researcher's computer. Other variants remain unavailable for real querying.
 - Successful small-slice queries can download only their returned values as CSV (array indices, step, and time per value) or JSON (the complete response and query context). These downloads do not re-read the source file.
@@ -69,6 +70,8 @@ The frontend tests cover variant mapping, download resolution, request payload s
 
 ## Dataset Access Modes
 
+Each Isotropic variant has its own preview entry in `src/config/isotropicTurbulenceConfig.ts`. The 16:9 placeholder SVGs live in `public/dataset-previews/`. To replace one with a verified scientific visualization, add the image under `public/`, update that variant's `image` and `alt` in `datasetPreviews`, and set its `type` to `visualization`. This changes the displayed label without changing query availability or source-file metadata. Missing images show a fallback.
+
 **Download Full Dataset** is an optional direct Hugging Face link to the complete 32.6 GiB original source file at the pinned commit. It does not require variable, spatial, or time settings. The browser handles the transfer; the app does not fetch or parse the HDF5 file. Other variants show a disabled control. Normal development and queries do not require this download.
 
 **Continue with Query** opens a verified workflow for the We = 0.5 variant. Choose one of the five HDF5 field IDs, an operation (point, 2D slice, 3D volume, or time series), and integer half-open `[start, stop)` index ranges. The browser sends a JSON request to the local API; the Python service validates the variant, field, bounds, operation, and 4,096-value limit before reading only that HDF5 slice. The response includes actual numerical values, shape, dtype, and matching `/time` and `/step` values. No physical-coordinate mapping, resampling, or interpolation is claimed. The other configurations cannot proceed past variable selection until their files are inspected.
@@ -100,6 +103,7 @@ Large scientific datasets are intentionally not stored in Git. The frontend's fu
 | `src/App.tsx`, `src/pages/` | Hash routing and application pages |
 | `src/components/` | Reusable UI, including Query Builder and Dataset Access |
 | `src/config/isotropicTurbulenceConfig.ts` | Authoritative Isotropic variants and route context |
+| `public/dataset-previews/`, `src/components/isotropic/DatasetPreview.tsx` | Per-variant placeholder artwork and responsive preview panel |
 | `metadata/we-0.5.schema.json` | Verified field shapes and metadata shared by frontend and query service |
 | `docs/we-0.5-schema.md` | Human-readable inspection report and prototype comparison |
 | `backend/` | Local HDF5 inspection, bounded slice service, and tests |

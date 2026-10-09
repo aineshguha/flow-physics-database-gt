@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { test } from "node:test";
-import { flowConfigurations, getDatasetConfiguration, getIsotropicDraftFromQueryPath, getIsotropicQueryContext, getIsotropicSelectionFromQueryPath, getVerifiedDatasetSchema, type FlowCategory } from "../src/config/isotropicTurbulenceConfig";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { DatasetPreview } from "../src/components/isotropic/DatasetPreview";
+import { flowConfigurations, getDatasetConfiguration, getDatasetPreview, getIsotropicDraftFromQueryPath, getIsotropicQueryContext, getIsotropicSelectionFromQueryPath, getVerifiedDatasetSchema, type FlowCategory } from "../src/config/isotropicTurbulenceConfig";
 import { buildRequestPayload } from "../src/config/queryRequest";
 import type { EstimatorResult, QueryState } from "../src/types/flow";
 import { getDataset } from "../src/services/datasetService";
@@ -56,6 +60,38 @@ test("invalid selections cannot fall back to a different dataset", async () => {
   assert.ok(getDatasetConfiguration({ category: "droplets", parameter: "densityRatio", value: 1000 }));
   assert.equal(getVerifiedDatasetSchema({ category: "emulsions", parameter: "weberNumber", value: 0.5 })?.fields.u_face.shape[1], 129);
   assert.equal(getVerifiedDatasetSchema({ category: "emulsions", parameter: "weberNumber", value: 1 }), null);
+});
+
+test("every Isotropic variant has a distinct local illustrative preview", () => {
+  const paths = new Set<string>();
+  for (const category of Object.keys(flowConfigurations) as FlowCategory[]) {
+    const branch = flowConfigurations[category];
+    for (const value of branch.values) {
+      const selection = { category, parameter: branch.parameter, value };
+      const preview = getDatasetPreview(selection);
+      assert.ok(preview, `${category}/${value} is missing a preview`);
+      assert.equal(preview.type, "placeholder");
+      assert.match(preview.alt, /Illustrative/);
+      assert.ok(preview.image.startsWith("/dataset-previews/"));
+      assert.ok(existsSync(`public${preview.image}`), `${preview.image} is missing`);
+      paths.add(preview.image);
+    }
+  }
+  assert.equal(paths.size, 12);
+  assert.equal(getDatasetPreview({ category: "droplets", parameter: "densityRatio", value: "999" }), null);
+});
+
+test("Dataset Preview identifies the selected variant and handles an unavailable image", () => {
+  const selection = { category: "droplets" as const, parameter: "densityRatio" as const, value: "1000" };
+  const html = renderToStaticMarkup(createElement(DatasetPreview, { selection }));
+  assert.match(html, /Dataset Preview/);
+  assert.match(html, /Illustrative Preview/);
+  assert.match(html, /Density Ratio/);
+  assert.match(html, /1000/);
+  assert.match(html, /droplets-dr-1000\.svg/);
+  assert.match(html, /Not a visualization of this dataset/);
+  const fallback = renderToStaticMarkup(createElement(DatasetPreview, { selection: { ...selection, value: "999" } }));
+  assert.match(fallback, /Preview unavailable/);
 });
 
 test("option lists and URL context preserve every supported parameter", () => {
